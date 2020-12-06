@@ -1,0 +1,11 @@
+query Catalogs {
+  catalogs {
+    id
+    title
+    issn
+    cn
+    period
+    createdAt
+    updatedAt
+  }
+}

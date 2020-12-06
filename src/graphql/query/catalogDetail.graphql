@@ -1,0 +1,19 @@
+query CatalogDetail($catalogId: Int!) {
+  catalog(id:$catalogId, detail:true) {
+    id
+    title
+    issn
+    cn
+    period
+    createdAt
+    updatedAt
+    journals {
+      id
+      year
+      vol
+      no
+      total
+      rem
+    }
+  }
+}

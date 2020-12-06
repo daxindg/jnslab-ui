@@ -1,0 +1,36 @@
+mutation CreateCatalog(
+  $title: String!
+  $issn: String!
+  $period: String!
+  $cn: String
+  $yfdh: String
+  $organizer: String
+  $pub_place:String
+) {
+  createCatalog(
+    inputs: {
+    title: $title
+    issn: $issn
+    period: $period
+    cn: $cn
+    yfdh: $yfdh
+    organizer:$organizer
+    pub_place: $pub_place
+    }
+  ) {
+    catalog {
+      id
+      title
+      issn
+      period
+      cn
+      yfdh
+      organizer
+      pub_place
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
