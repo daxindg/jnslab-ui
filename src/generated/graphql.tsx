@@ -42,7 +42,7 @@ export type Catalog = {
   organizer?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
-  journals: Array<Journal>;
+  journals?: Maybe<Array<Journal>>;
 };
 
 
@@ -285,10 +285,10 @@ export type CatalogDetailQuery = (
   & { catalog?: Maybe<(
     { __typename?: 'Catalog' }
     & Pick<Catalog, 'id' | 'title' | 'issn' | 'cn' | 'period' | 'createdAt' | 'updatedAt'>
-    & { journals: Array<(
+    & { journals?: Maybe<Array<(
       { __typename?: 'Journal' }
       & Pick<Journal, 'id' | 'year' | 'vol' | 'no' | 'total' | 'rem'>
-    )> }
+    )>> }
   )> }
 );
 

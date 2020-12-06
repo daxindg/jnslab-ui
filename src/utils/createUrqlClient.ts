@@ -4,7 +4,7 @@ import { LoginMutation, MeQuery, MeDocument, RegisterMutation, LogoutMutation } 
 import { updateQuery } from "./updateQuery";
 
 export const createUrqlClient = (ssrExchange:any) => ({
-  url: process.env.NEXT_PUBLIC_API_URL,
+  url: process.env.NEXT_PUBLIC_API_URL!,
   fetchOptions: {
     credentials: "include" as const,
   },
