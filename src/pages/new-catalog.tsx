@@ -21,21 +21,21 @@ import { InputField } from "../components/InputField";
 import { NavBar } from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
 import { useCreateCatalogMutation, useMeQuery } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { testEdit } from "../utils/permissions";
 import { toErrorMap } from "../utils/toErrorMap";
 import NextLink from "next/link";
 import { clearAndSetTimeout } from "../utils/setTimeout";
+import { isServer } from "../utils/isServer";
 
 const NewCatalog: React.FC<{}> = ({}) => {
-  const [{ data: meData, fetching }] = useMeQuery();
+  const { data: meData, loading } = useMeQuery();
   const [period, setPeriod] = useState<string>("");
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [, createCatalog] = useCreateCatalogMutation();
+  const [createCatalog] = useCreateCatalogMutation();
   const router = useRouter();
   let body = null;
-  if (fetching) {
+  if (loading) {
     body = (
       <Spinner
         thickness="4px"
@@ -57,7 +57,7 @@ const NewCatalog: React.FC<{}> = ({}) => {
           organizer: "",
         }}
         onSubmit={async (value, { setErrors }) => {
-          const res = await createCatalog({ period, ...value });
+          const res = await createCatalog({variables: { period, ...value }});
 
           if (res.data?.createCatalog.errors) {
             setErrors(toErrorMap(res.data.createCatalog.errors));
@@ -185,7 +185,7 @@ const NewCatalog: React.FC<{}> = ({}) => {
       </Alert>
     );
     clearAndSetTimeout(() => {
-      router.push("/");
+      if (!isServer())router.push("/");
     }, 3);
   }
 
@@ -197,4 +197,4 @@ const NewCatalog: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(NewCatalog);
+export default NewCatalog;

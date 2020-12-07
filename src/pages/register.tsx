@@ -1,22 +1,20 @@
-import React from "react";
-import { useRouter } from "next/router";
-import { Form, Formik } from "formik";
+import { EmailIcon, LockIcon, PhoneIcon } from "@chakra-ui/icons";
 import { Box, Button } from "@chakra-ui/react";
-
-import { Wrapper } from "../components/Wrapper";
+import { Form, Formik } from "formik";
+import { useRouter } from "next/router";
+import React from "react";
 import { InputField } from "../components/InputField";
+import { NavBar } from "../components/NavBar";
+import { Wrapper } from "../components/Wrapper";
 import { useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
-import { NavBar } from "../components/NavBar";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
-import { EmailIcon, LockIcon, PhoneIcon } from "@chakra-ui/icons";
+
 
 interface registerProps {}
 
 export const Register: React.FC<registerProps> = () => {
   const router = useRouter();
-  const [{}, register] = useRegisterMutation();
+  const [register]= useRegisterMutation();
   return (
     <>
     <NavBar/>
@@ -24,7 +22,7 @@ export const Register: React.FC<registerProps> = () => {
       <Formik
         initialValues={{ username: "", password: "", email: "", phone: "" }}
         onSubmit={async (value, { setErrors }) => {
-          const res = await register(value);
+          const res = await register({variables: value});
           if (res.data?.register.errors) {
             setErrors(toErrorMap(res.data.register.errors));
           } else if (res.data?.register.user) {
@@ -85,4 +83,4 @@ export const Register: React.FC<registerProps> = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default Register;

@@ -1,14 +1,13 @@
-import { Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Spinner, Text } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { title } from "process";
 import React from "react";
 import { NavBar } from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
 import { useCatalogsQuery, useMeQuery } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
 const Index = () => {
-  const [{ data, fetching: fetchingCatalogs }] = useCatalogsQuery();
+  const { data, loading: fetchingCatalogs } = useCatalogsQuery();
 
   return (
     <>
@@ -38,11 +37,20 @@ const Index = () => {
                   </Text>
                 </Box>
               ))
-            : "...loading..."}
+            : (
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.500"
+                size="xl"
+                mx="auto"
+              />
+            )}
         </SimpleGrid>
       </Wrapper>
     </>
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default Index;

@@ -1,21 +1,21 @@
-import React from "react";
-import { useRouter } from "next/router";
-import { Form, Formik } from "formik";
+import { useApolloClient } from "@apollo/client";
 import { Box, Button, Flex, Link } from "@chakra-ui/react";
-
-import { Wrapper } from "../components/Wrapper";
+import { Form, Formik } from "formik";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import React from "react";
 import { InputField } from "../components/InputField";
+import { NavBar } from "../components/NavBar";
+import { Wrapper } from "../components/Wrapper";
 import { useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
-import { NavBar } from "../components/NavBar";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
-import NextLink from "next/link"
+
 interface loginProps {}
 
 const Login: React.FC<loginProps> = () => {
   const router = useRouter();
-  const [, login] = useLoginMutation();
+  const [login] = useLoginMutation();
+  const client = useApolloClient();
   return (
     <>
       <NavBar />
@@ -23,11 +23,12 @@ const Login: React.FC<loginProps> = () => {
         <Formik
           initialValues={{ usernameOrEmail: "", password: "" }}
           onSubmit={async (value, { setErrors }) => {
-            const res = await login(value);
+            const res = await login({variables: value});
             if (res.data?.login.errors) {
               setErrors(toErrorMap(res.data.login.errors));
             } else if (res.data?.login.user) {
-              router.push("/");
+              await client.resetStore();
+              await router.push("/");
             }
           }}
         >
@@ -69,4 +70,4 @@ const Login: React.FC<loginProps> = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Login);
+export default Login;
