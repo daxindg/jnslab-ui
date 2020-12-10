@@ -840,7 +840,7 @@
     "@chakra-ui/utils" "1.0.1"
     "@chakra-ui/visually-hidden" "1.0.1"
 
-"@chakra-ui/react@^1.0.0":
+"@chakra-ui/react@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@chakra-ui/react/-/react-1.0.3.tgz#75c1f654f75f674a6928fef5344915e3ec665683"
   integrity sha512-OgYS7dOGO5BsJGc2MLClkbRcMRDUd4Tp+O3GGJelB0tnbJvGbyoNc4ZghfGywzEqgeSvXGM7do09cTXmGKTQ5g==
