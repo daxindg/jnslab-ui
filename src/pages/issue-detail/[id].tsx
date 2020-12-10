@@ -16,3 +16,5 @@ IssueDetail.getInitialProps = ({query}) => {
     id: parseInt(query.id as string), 
   };
 }
+
+export default IssueDetail;
