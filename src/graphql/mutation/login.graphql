@@ -1,7 +1,7 @@
 mutation Login($usernameOrEmail: String!, $password:String!){
   login(password: $password, usernameOrEmail: $usernameOrEmail) {
     user{
-      ...RegularUser
+      ...UserFragment
     }
     errors {
       ...RegularFieldErrors

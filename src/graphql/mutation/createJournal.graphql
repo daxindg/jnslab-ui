@@ -1,4 +1,4 @@
-mutation CreateCatalog(
+mutation CreateJournal(
   $title: String!
   $issn: String!
   $period: String!
@@ -7,7 +7,7 @@ mutation CreateCatalog(
   $organizer: String
   $pub_place:String
 ) {
-  createCatalog(
+  createJournal(
     inputs: {
     title: $title
     issn: $issn
@@ -18,15 +18,8 @@ mutation CreateCatalog(
     pub_place: $pub_place
     }
   ) {
-    catalog {
-      id
-      title
-      issn
-      period
-      cn
-      yfdh
-      organizer
-      pub_place
+    journal {
+      ...JournalFragment
     }
     errors {
       field

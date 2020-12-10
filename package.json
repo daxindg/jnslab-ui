@@ -10,7 +10,7 @@
   "dependencies": {
     "@apollo/client": "^3.3.4",
     "@chakra-ui/icons": "^1.0.0",
-    "@chakra-ui/react": "^1.0.0",
+    "@chakra-ui/react": "^1.0.3",
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
     "dotenv-safe": "^8.2.0",
@@ -19,9 +19,9 @@
     "graphql": "^15.4.0",
     "graphql-tag": "^2.11.0",
     "next": "latest",
-    "next-urql": "^2.1.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-focus-lock": "^2.5.0",
     "react-is": "^17.0.1"
   },
   "license": "MIT",

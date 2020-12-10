@@ -1,0 +1,11 @@
+mutation CreateIssue($inputs:IssueInputs!, $journalId: Int!) {
+  createIssue(inputs: $inputs, journalId: $journalId) {
+    issue {
+      ...IssueFragment
+    }
+    errors {
+     	field
+      message
+    }
+  }
+}

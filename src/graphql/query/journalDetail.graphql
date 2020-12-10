@@ -1,0 +1,17 @@
+query JournalDetail($id: Int!) {
+  journal(id:$id, detail:true) {
+    id
+    title
+    issn
+    cn
+    yfdh
+    period
+    pub_place
+    organizer
+    createdAt
+    updatedAt
+    issues {
+      ...IssueFragment
+    }
+  }
+}

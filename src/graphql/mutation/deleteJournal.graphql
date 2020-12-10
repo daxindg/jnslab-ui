@@ -1,0 +1,3 @@
+mutation DeleteJournal($id: Int!) {
+  deleteJournal(id: $id)
+}

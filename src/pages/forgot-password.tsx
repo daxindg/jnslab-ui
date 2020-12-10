@@ -1,6 +1,5 @@
 import { Box, Flex, Button, Text } from '@chakra-ui/react';
 import { Formik, Form } from 'formik';
-import { withUrqlClient } from 'next-urql';
 import React, { useState } from 'react';
 import { InputField } from '../components/InputField';
 import { NavBar } from '../components/NavBar';

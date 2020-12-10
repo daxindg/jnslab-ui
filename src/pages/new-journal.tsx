@@ -12,28 +12,29 @@ import {
   AlertDescription,
   Spinner,
   Link,
+  useToast,
 } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
-import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { InputField } from "../components/InputField";
 import { NavBar } from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
-import { useCreateCatalogMutation, useMeQuery } from "../generated/graphql";
+import { useCreateJournalMutation, useMeQuery } from "../generated/graphql";
 import { testEdit } from "../utils/permissions";
 import { toErrorMap } from "../utils/toErrorMap";
 import NextLink from "next/link";
 import { clearAndSetTimeout } from "../utils/setTimeout";
 import { isServer } from "../utils/isServer";
 
-const NewCatalog: React.FC<{}> = ({}) => {
+const NewJournal: React.FC<{}> = ({}) => {
   const { data: meData, loading } = useMeQuery();
   const [period, setPeriod] = useState<string>("");
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [createCatalog] = useCreateCatalogMutation();
+  const [createJournal] = useCreateJournalMutation();
   const router = useRouter();
+  const toast = useToast();
   let body = null;
   if (loading) {
     body = (
@@ -57,16 +58,13 @@ const NewCatalog: React.FC<{}> = ({}) => {
           organizer: "",
         }}
         onSubmit={async (value, { setErrors }) => {
-          const res = await createCatalog({variables: { period, ...value }});
+          const res = await createJournal({ variables: { period, ...value } });
 
-          if (res.data?.createCatalog.errors) {
-            setErrors(toErrorMap(res.data.createCatalog.errors));
-          } else if (res.data?.createCatalog.catalog) {
-            // TODO redirect to detail page
+          if (res.data?.createJournal.errors) {
+            setErrors(toErrorMap(res.data.createJournal.errors));
+          } else if (res.data?.createJournal.journal) {
             setSuccess(true);
-            clearAndSetTimeout(() => {
-              router.push("/");
-            }, 3);
+            router.push(`/journal-detail/${res.data.createJournal.journal.id}`);
           } else {
             setError(true);
           }
@@ -138,18 +136,6 @@ const NewCatalog: React.FC<{}> = ({}) => {
               />
             </Box>
 
-            {success ? (
-              <Box mt={4}>
-                <Alert status="success" variant="left-accent">
-                  <AlertIcon />
-                  新建期刊目录成功, 3秒后转到
-                  <NextLink href="#">
-                    // TODO replace with link of detail page;
-                    <Link color="teal">详情页</Link>
-                  </NextLink>
-                </Alert>
-              </Box>
-            ) : null}
 
             {error ? (
               <Box mt={4}>
@@ -175,18 +161,13 @@ const NewCatalog: React.FC<{}> = ({}) => {
       </Formik>
     );
   } else {
-    body = (
-      <Alert status="error" width="300px" mx="auto">
-        <AlertIcon />
-        <Box flex="1">
-          <AlertTitle>错误!</AlertTitle>
-          <AlertDescription display="block">权限不足</AlertDescription>
-        </Box>
-      </Alert>
-    );
-    clearAndSetTimeout(() => {
-      if (!isServer())router.push("/");
-    }, 3);
+    toast({
+      title: "权限不足",
+      duration: 3000,
+      isClosable: true,
+      status: "error",
+    });
+    router.back();
   }
 
   return (
@@ -197,4 +178,4 @@ const NewCatalog: React.FC<{}> = ({}) => {
   );
 };
 
-export default NewCatalog;
+export default NewJournal;

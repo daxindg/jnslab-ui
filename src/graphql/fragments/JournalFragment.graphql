@@ -1,0 +1,10 @@
+fragment JournalFragment on Journal {
+  id
+  title
+  issn
+  period
+  cn
+  yfdh
+  organizer
+  pub_place
+}

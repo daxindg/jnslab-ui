@@ -5,8 +5,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { InputField } from "../components/InputField";
-import { NavBar } from "../components/NavBar";
-import { Wrapper } from "../components/Wrapper";
+import { Layout } from "../components/Layout";
 import { useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 
@@ -17,9 +16,7 @@ const Login: React.FC<loginProps> = () => {
   const [login] = useLoginMutation();
   const client = useApolloClient();
   return (
-    <>
-      <NavBar />
-      <Wrapper varient="small">
+      <Layout varient="small">
         <Formik
           initialValues={{ usernameOrEmail: "", password: "" }}
           onSubmit={async (value, { setErrors }) => {
@@ -28,7 +25,7 @@ const Login: React.FC<loginProps> = () => {
               setErrors(toErrorMap(res.data.login.errors));
             } else if (res.data?.login.user) {
               await client.resetStore();
-              await router.push("/");
+              router.back();
             }
           }}
         >
@@ -65,8 +62,7 @@ const Login: React.FC<loginProps> = () => {
             </Form>
           )}
         </Formik>
-      </Wrapper>
-    </>
+      </Layout>
   );
 };
 

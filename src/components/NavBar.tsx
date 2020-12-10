@@ -1,33 +1,48 @@
 import { useApolloClient } from "@apollo/client";
-import { Button, Flex, Link, Spacer } from "@chakra-ui/react";
+import { MoonIcon } from "@chakra-ui/icons";
+import {
+  Button,
+  Divider,
+  Flex,
+  Heading,
+  Link,
+  Spacer,
+  Switch,
+  useColorMode,
+} from "@chakra-ui/react";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { testEdit } from "../utils/permissions";
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
+  const { colorMode, toggleColorMode } = useColorMode();
+  const router = useRouter();
   const { data, loading: fetchingMe } = useMeQuery({ skip: isServer() });
   const [logout, { loading: fetchingLogout }] = useLogoutMutation();
   const apolloClient = useApolloClient();
-  let body = null;
+  let body = <></>;
   if (data?.me) {
     body = (
       <>
+        <Button
+          isLoading={fetchingLogout}
+          variant="link"
+          onClick={async () => {
+            await logout();
+            await apolloClient.resetStore();
+            router.push("/");
+          }}
+        >
+          登出
+        </Button>
         <NextLink href="#">
-          <Button
-            isLoading={fetchingLogout}
-            variant="link"
-            onClick={async () => {
-              await logout();
-              await apolloClient.resetStore();
-            }}
-          >
-            登出
-          </Button>
-        </NextLink>
-        <NextLink href="#">
-          <Link ml={3}>{data.me.username}</Link>
+          <Link as={Flex} alignItems="center" p={0} ml={3}>
+            {data.me.username}
+          </Link>
         </NextLink>
       </>
     );
@@ -44,15 +59,31 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   }
   return (
-    <Flex position="sticky" top="0" bg="tan" p="4" justifyContent="center">
-      <NextLink href="/">
-        <Link ml={3}>主页</Link>
-      </NextLink>
-      <NextLink href="/new-catalog">
-        <Link ml={3}>新建目录</Link>
-      </NextLink>
-      <Spacer />
-      {body}
+    <Flex shadow="md" position="sticky" top="0" p="4" justifyContent="center">
+      <Flex
+        maxWidth="900px"
+        flex={1}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <NextLink href="/">
+          <Link color="gray.700" as={Heading} ml={3}>
+            期刊管理系统
+          </Link>
+        </NextLink>
+        {!testEdit(data?.me?.permission) ? null : (
+          <NextLink href="/new-journal">
+            <Link ml={3}>新建目录</Link>
+          </NextLink>
+        )}
+        <Spacer />
+        {body}
+        <Divider ml={3} mr={3} h="30px" orientation="vertical" />
+        <Flex>
+          <Switch size="sm" onChange={toggleColorMode} />
+          <MoonIcon ml={1} />
+        </Flex>
+      </Flex>
     </Flex>
   );
 };

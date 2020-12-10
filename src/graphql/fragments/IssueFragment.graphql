@@ -1,0 +1,9 @@
+fragment IssueFragment on Issue {
+  id
+  year
+  vol
+  no
+  total
+  rem
+  journalId
+}

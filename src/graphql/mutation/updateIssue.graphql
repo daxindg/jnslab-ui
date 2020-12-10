@@ -1,0 +1,11 @@
+mutation UpdateIssue($inputs:IssueInputs!, $id:Int!) {
+  updateIssue(inputs:$inputs, id: $id) {
+    issue {
+      ...IssueFragment
+    }
+    errors {
+      field
+      message
+    }
+  }
+}

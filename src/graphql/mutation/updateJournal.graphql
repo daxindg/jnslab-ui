@@ -1,0 +1,11 @@
+mutation UpdateJournal($id: Int!, $inputs: JournalInputs!){
+  updateJournal(id: $id, inputs: $inputs) {
+    errors {
+      field
+      message
+    }
+    journal {
+      ...JournalFragment
+    }
+  }
+}
