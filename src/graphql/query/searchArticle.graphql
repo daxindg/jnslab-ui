@@ -1,0 +1,5 @@
+query SearchArticle($searchText: String!, $type: String!,  $cursor: Int! = 0, $limit: Int! = 10){
+  searchArticle(searchText:$searchText, type: $type, cursor:$cursor, limit:$limit) {
+    ...ArticleFragment
+  }
+}

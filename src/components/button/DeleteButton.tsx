@@ -1,5 +1,6 @@
-import { Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, AlertDialogProps, AlertDialogCloseButton } from '@chakra-ui/react';
-import React from 'react';
+import { DeleteIcon } from "@chakra-ui/icons";
+import { AlertDialog, AlertDialogBody, AlertDialogCloseButton, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, toast } from "@chakra-ui/react";
+import React, { useState } from "react";
 
 interface DeleteAlertDialogProps {
   onConfirm: () => void;
@@ -7,7 +8,7 @@ interface DeleteAlertDialogProps {
   isOpen: boolean;
 }
 
-export const DeleteAlertDialog: React.FC<DeleteAlertDialogProps> = ({isOpen, setIsOpen, onConfirm}) => {
+const DeleteAlertDialog: React.FC<DeleteAlertDialogProps> = ({isOpen, setIsOpen, onConfirm}) => {
   const onClose = () => setIsOpen(false)
   const cancelRef = React.useRef<any>()
   return (
@@ -46,3 +47,36 @@ export const DeleteAlertDialog: React.FC<DeleteAlertDialogProps> = ({isOpen, set
     </>
   );
 }
+
+interface DeleteButtonProps {
+  onConfirm: () => void;
+  isLoading: boolean;
+}
+
+export const DeleteButton: React.FC<DeleteButtonProps> = ({onConfirm, isLoading}) => {
+  const [isOpen, setIsOpen ] = useState(false);
+  return (
+    <>
+      <Button
+        _focus={{
+          boxShadow: "none",
+        }}
+        onClick={() => {
+          setIsOpen(true);
+        }}
+        isLoading={isLoading}
+        border="none"
+        outline="none"
+        variant="ghost"
+        size="sm"
+      >
+        <DeleteIcon color="red.500" />
+      </Button>
+      <DeleteAlertDialog
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        onConfirm={onConfirm}
+      />
+    </>
+  );
+};

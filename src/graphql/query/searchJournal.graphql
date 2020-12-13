@@ -1,0 +1,5 @@
+query SearchJournal($searchText: String!, $cursor: Int = 0, $limit: Int = 10) {
+  searchJournal(searchText: $searchText, cursor: $cursor, limit: $limit) {
+    ...JournalFragment
+  }
+}

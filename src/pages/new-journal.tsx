@@ -167,7 +167,7 @@ const NewJournal: React.FC<{}> = ({}) => {
       isClosable: true,
       status: "error",
     });
-    router.back();
+    router.push('/');
   }
 
   return (

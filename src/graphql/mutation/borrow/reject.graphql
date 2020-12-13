@@ -1,0 +1,6 @@
+mutation Reject($id:Int!) { 
+  reject(id:$id) {
+    id
+    state
+  }
+}

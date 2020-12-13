@@ -1,0 +1,10 @@
+mutation CreateArticle($inputs: ArticleInputs!, $issueId: Int!){
+  createArticle(inputs: $inputs, issueId: $issueId ) {
+    article {
+      ...ArticleFragment 
+    }
+    errors {
+      ...RegularFieldErrors
+    }
+  }
+}

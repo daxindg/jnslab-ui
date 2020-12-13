@@ -1,0 +1,6 @@
+mutation Return($id:Int!){
+  return(id: $id) {
+    id
+    state
+  }
+}

@@ -1,0 +1,6 @@
+mutation Accept($id:Int!) { 
+  accept(id:$id) {
+    id
+    state
+  }
+}

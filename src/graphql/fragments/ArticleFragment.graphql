@@ -1,0 +1,9 @@
+fragment ArticleFragment on Article {
+  id
+  title
+  authors
+  keywords
+  pbegin
+  pend
+  issueId
+}

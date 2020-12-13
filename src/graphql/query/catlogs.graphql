@@ -1,5 +1,5 @@
-query Catalogs {
-  catalogs {
+query Catalogs($cursor: Int! = 0, $limit: Int! = 20) {
+  catalogs(cursor: $cursor, limit: $limit) {
     id
     title
     issn

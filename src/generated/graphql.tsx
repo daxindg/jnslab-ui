@@ -19,9 +19,21 @@ export type Query = {
   __typename?: 'Query';
   catalogs: Array<Journal>;
   journal?: Maybe<Journal>;
+  searchJournal: Array<Journal>;
   me?: Maybe<User>;
   issueCatalog: Array<Issue>;
   issue?: Maybe<Issue>;
+  articleCatalog: Array<Article>;
+  article?: Maybe<Article>;
+  searchArticle: Array<Article>;
+  getBorrows: Array<Borrow>;
+  getPendings: Array<Borrow>;
+};
+
+
+export type QueryCatalogsArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['Int']>;
 };
 
 
@@ -31,9 +43,43 @@ export type QueryJournalArgs = {
 };
 
 
+export type QuerySearchJournalArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['Int']>;
+  searchText: Scalars['String'];
+};
+
+
 export type QueryIssueArgs = {
   detail?: Maybe<Scalars['Boolean']>;
   id: Scalars['Int'];
+};
+
+
+export type QueryArticleArgs = {
+  detail?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
+};
+
+
+export type QuerySearchArticleArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['Int']>;
+  type: Scalars['String'];
+  searchText: Scalars['String'];
+};
+
+
+export type QueryGetBorrowsArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['Int']>;
+  isReturned: Scalars['Boolean'];
+};
+
+
+export type QueryGetPendingsArgs = {
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['Int']>;
 };
 
 export type Journal = {
@@ -61,7 +107,20 @@ export type Issue = {
   total: Scalars['Int'];
   rem: Scalars['Int'];
   journalId: Scalars['Int'];
+  articles: Array<Article>;
   journal: Journal;
+};
+
+export type Article = {
+  __typename?: 'Article';
+  id: Scalars['Int'];
+  title: Scalars['String'];
+  authors: Scalars['String'];
+  keywords: Scalars['String'];
+  pbegin: Scalars['Int'];
+  pend: Scalars['Int'];
+  issueId: Scalars['Int'];
+  issue: Issue;
 };
 
 export type User = {
@@ -69,10 +128,24 @@ export type User = {
   id: Scalars['Int'];
   username?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
-  permission?: Maybe<Scalars['Float']>;
+  permission?: Maybe<Scalars['Int']>;
   phone?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
+};
+
+export type Borrow = {
+  __typename?: 'Borrow';
+  id: Scalars['Int'];
+  state: Scalars['Int'];
+  expireAt: Scalars['DateTime'];
+  borrowAt: Scalars['DateTime'];
+  returnAt?: Maybe<Scalars['DateTime']>;
+  createAt: Scalars['DateTime'];
+  issueId: Scalars['Int'];
+  userId: Scalars['Int'];
+  user: User;
+  issue: Issue;
 };
 
 export type Mutation = {
@@ -89,6 +162,13 @@ export type Mutation = {
   createIssue: IssueResponse;
   updateIssue: IssueResponse;
   deleteIssue: Scalars['Boolean'];
+  createArticle: ArticleResponse;
+  updateArticle: ArticleResponse;
+  deleteArticle: Scalars['Boolean'];
+  borrow?: Maybe<Borrow>;
+  return?: Maybe<Borrow>;
+  accept?: Maybe<Borrow>;
+  reject?: Maybe<Borrow>;
 };
 
 
@@ -151,6 +231,43 @@ export type MutationDeleteIssueArgs = {
   id: Scalars['Int'];
 };
 
+
+export type MutationCreateArticleArgs = {
+  inputs: ArticleInputs;
+  issueId: Scalars['Int'];
+};
+
+
+export type MutationUpdateArticleArgs = {
+  inputs: ArticleInputs;
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteArticleArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationBorrowArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationReturnArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationAcceptArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationRejectArgs = {
+  id: Scalars['Int'];
+};
+
 export type JournalResponse = {
   __typename?: 'JournalResponse';
   errors?: Maybe<Array<FieldError>>;
@@ -200,6 +317,25 @@ export type IssueInputs = {
   rem?: Maybe<Scalars['Int']>;
 };
 
+export type ArticleResponse = {
+  __typename?: 'ArticleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  article?: Maybe<Article>;
+};
+
+export type ArticleInputs = {
+  title: Scalars['String'];
+  authors: Scalars['String'];
+  keywords: Scalars['String'];
+  pbegin?: Maybe<Scalars['Int']>;
+  pend?: Maybe<Scalars['Int']>;
+};
+
+export type ArticleFragmentFragment = (
+  { __typename?: 'Article' }
+  & Pick<Article, 'id' | 'title' | 'authors' | 'keywords' | 'pbegin' | 'pend' | 'issueId'>
+);
+
 export type IssueFragmentFragment = (
   { __typename?: 'Issue' }
   & Pick<Issue, 'id' | 'year' | 'vol' | 'no' | 'total' | 'rem' | 'journalId'>
@@ -220,69 +356,54 @@ export type UserFragmentFragment = (
   & Pick<User, 'id' | 'username' | 'email' | 'permission'>
 );
 
-export type CreateIssueMutationVariables = Exact<{
-  inputs: IssueInputs;
-  journalId: Scalars['Int'];
+export type CreateArticleMutationVariables = Exact<{
+  inputs: ArticleInputs;
+  issueId: Scalars['Int'];
 }>;
 
 
-export type CreateIssueMutation = (
+export type CreateArticleMutation = (
   { __typename?: 'Mutation' }
-  & { createIssue: (
-    { __typename?: 'IssueResponse' }
-    & { issue?: Maybe<(
-      { __typename?: 'Issue' }
-      & IssueFragmentFragment
+  & { createArticle: (
+    { __typename?: 'ArticleResponse' }
+    & { article?: Maybe<(
+      { __typename?: 'Article' }
+      & ArticleFragmentFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
-      & Pick<FieldError, 'field' | 'message'>
+      & RegularFieldErrorsFragment
     )>> }
   ) }
 );
 
-export type CreateJournalMutationVariables = Exact<{
-  title: Scalars['String'];
-  issn: Scalars['String'];
-  period: Scalars['String'];
-  cn?: Maybe<Scalars['String']>;
-  yfdh?: Maybe<Scalars['String']>;
-  organizer?: Maybe<Scalars['String']>;
-  pub_place?: Maybe<Scalars['String']>;
+export type DeleteArticleMutationVariables = Exact<{
+  id: Scalars['Int'];
 }>;
 
 
-export type CreateJournalMutation = (
+export type DeleteArticleMutation = (
   { __typename?: 'Mutation' }
-  & { createJournal: (
-    { __typename?: 'JournalResponse' }
-    & { journal?: Maybe<(
-      { __typename?: 'Journal' }
-      & JournalFragmentFragment
+  & Pick<Mutation, 'deleteArticle'>
+);
+
+export type UpdateArticleMutationVariables = Exact<{
+  inputs: ArticleInputs;
+  id: Scalars['Int'];
+}>;
+
+
+export type UpdateArticleMutation = (
+  { __typename?: 'Mutation' }
+  & { updateArticle: (
+    { __typename?: 'ArticleResponse' }
+    & { article?: Maybe<(
+      { __typename?: 'Article' }
+      & ArticleFragmentFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
-      & Pick<FieldError, 'field' | 'message'>
+      & RegularFieldErrorsFragment
     )>> }
   ) }
-);
-
-export type DeleteIssueMutationVariables = Exact<{
-  id: Scalars['Int'];
-}>;
-
-
-export type DeleteIssueMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'deleteIssue'>
-);
-
-export type DeleteJournalMutationVariables = Exact<{
-  id: Scalars['Int'];
-}>;
-
-
-export type DeleteJournalMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'deleteJournal'>
 );
 
 export type ForgotPasswordMutationVariables = Exact<{
@@ -361,6 +482,88 @@ export type ResetPasswordMutation = (
   ) }
 );
 
+export type AcceptMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type AcceptMutation = (
+  { __typename?: 'Mutation' }
+  & { accept?: Maybe<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'id' | 'state'>
+  )> }
+);
+
+export type BorrowMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type BorrowMutation = (
+  { __typename?: 'Mutation' }
+  & { borrow?: Maybe<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'id'>
+  )> }
+);
+
+export type RejectMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type RejectMutation = (
+  { __typename?: 'Mutation' }
+  & { reject?: Maybe<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'state'>
+  )> }
+);
+
+export type ReturnMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type ReturnMutation = (
+  { __typename?: 'Mutation' }
+  & { return?: Maybe<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'id' | 'state'>
+  )> }
+);
+
+export type CreateIssueMutationVariables = Exact<{
+  inputs: IssueInputs;
+  journalId: Scalars['Int'];
+}>;
+
+
+export type CreateIssueMutation = (
+  { __typename?: 'Mutation' }
+  & { createIssue: (
+    { __typename?: 'IssueResponse' }
+    & { issue?: Maybe<(
+      { __typename?: 'Issue' }
+      & IssueFragmentFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'field' | 'message'>
+    )>> }
+  ) }
+);
+
+export type DeleteIssueMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeleteIssueMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deleteIssue'>
+);
+
 export type UpdateIssueMutationVariables = Exact<{
   inputs: IssueInputs;
   id: Scalars['Int'];
@@ -376,9 +579,44 @@ export type UpdateIssueMutation = (
       & IssueFragmentFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
+      & RegularFieldErrorsFragment
+    )>> }
+  ) }
+);
+
+export type CreateJournalMutationVariables = Exact<{
+  title: Scalars['String'];
+  issn: Scalars['String'];
+  period: Scalars['String'];
+  cn?: Maybe<Scalars['String']>;
+  yfdh?: Maybe<Scalars['String']>;
+  organizer?: Maybe<Scalars['String']>;
+  pub_place?: Maybe<Scalars['String']>;
+}>;
+
+
+export type CreateJournalMutation = (
+  { __typename?: 'Mutation' }
+  & { createJournal: (
+    { __typename?: 'JournalResponse' }
+    & { journal?: Maybe<(
+      { __typename?: 'Journal' }
+      & JournalFragmentFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
       & Pick<FieldError, 'field' | 'message'>
     )>> }
   ) }
+);
+
+export type DeleteJournalMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeleteJournalMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deleteJournal'>
 );
 
 export type UpdateJournalMutationVariables = Exact<{
@@ -401,7 +639,10 @@ export type UpdateJournalMutation = (
   ) }
 );
 
-export type CatalogsQueryVariables = Exact<{ [key: string]: never; }>;
+export type CatalogsQueryVariables = Exact<{
+  cursor?: Scalars['Int'];
+  limit?: Scalars['Int'];
+}>;
 
 
 export type CatalogsQuery = (
@@ -409,6 +650,71 @@ export type CatalogsQuery = (
   & { catalogs: Array<(
     { __typename?: 'Journal' }
     & Pick<Journal, 'id' | 'title' | 'issn' | 'cn' | 'period' | 'createdAt' | 'updatedAt'>
+  )> }
+);
+
+export type GetBorrowsQueryVariables = Exact<{
+  isReturned: Scalars['Boolean'];
+  cursor?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type GetBorrowsQuery = (
+  { __typename?: 'Query' }
+  & { getBorrows: Array<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'expireAt' | 'borrowAt' | 'returnAt' | 'state' | 'id'>
+    & { user: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'username'>
+    ), issue: (
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'id' | 'no'>
+      & { journal: (
+        { __typename?: 'Journal' }
+        & Pick<Journal, 'title'>
+      ) }
+    ) }
+  )> }
+);
+
+export type GetPendingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPendingsQuery = (
+  { __typename?: 'Query' }
+  & { getPendings: Array<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'id' | 'state' | 'borrowAt' | 'expireAt'>
+    & { user: (
+      { __typename?: 'User' }
+      & Pick<User, 'id' | 'username'>
+    ), issue: (
+      { __typename?: 'Issue' }
+      & Pick<Issue, 'id' | 'no'>
+      & { journal: (
+        { __typename?: 'Journal' }
+        & Pick<Journal, 'id' | 'title'>
+      ) }
+    ) }
+  )> }
+);
+
+export type IssueDetailQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type IssueDetailQuery = (
+  { __typename?: 'Query' }
+  & { issue?: Maybe<(
+    { __typename?: 'Issue' }
+    & Pick<Issue, 'id' | 'year' | 'vol' | 'no' | 'total' | 'rem' | 'journalId'>
+    & { articles: Array<(
+      { __typename?: 'Article' }
+      & ArticleFragmentFragment
+    )> }
   )> }
 );
 
@@ -440,6 +746,48 @@ export type MeQuery = (
   )> }
 );
 
+export type SearchArticleQueryVariables = Exact<{
+  searchText: Scalars['String'];
+  type: Scalars['String'];
+  cursor?: Scalars['Int'];
+  limit?: Scalars['Int'];
+}>;
+
+
+export type SearchArticleQuery = (
+  { __typename?: 'Query' }
+  & { searchArticle: Array<(
+    { __typename?: 'Article' }
+    & ArticleFragmentFragment
+  )> }
+);
+
+export type SearchJournalQueryVariables = Exact<{
+  searchText: Scalars['String'];
+  cursor?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type SearchJournalQuery = (
+  { __typename?: 'Query' }
+  & { searchJournal: Array<(
+    { __typename?: 'Journal' }
+    & JournalFragmentFragment
+  )> }
+);
+
+export const ArticleFragmentFragmentDoc = gql`
+    fragment ArticleFragment on Article {
+  id
+  title
+  authors
+  keywords
+  pbegin
+  pend
+  issueId
+}
+    `;
 export const IssueFragmentFragmentDoc = gql`
     fragment IssueFragment on Issue {
   id
@@ -477,151 +825,114 @@ export const UserFragmentFragmentDoc = gql`
   permission
 }
     `;
-export const CreateIssueDocument = gql`
-    mutation CreateIssue($inputs: IssueInputs!, $journalId: Int!) {
-  createIssue(inputs: $inputs, journalId: $journalId) {
-    issue {
-      ...IssueFragment
+export const CreateArticleDocument = gql`
+    mutation CreateArticle($inputs: ArticleInputs!, $issueId: Int!) {
+  createArticle(inputs: $inputs, issueId: $issueId) {
+    article {
+      ...ArticleFragment
     }
     errors {
-      field
-      message
+      ...RegularFieldErrors
     }
   }
 }
-    ${IssueFragmentFragmentDoc}`;
-export type CreateIssueMutationFn = Apollo.MutationFunction<CreateIssueMutation, CreateIssueMutationVariables>;
+    ${ArticleFragmentFragmentDoc}
+${RegularFieldErrorsFragmentDoc}`;
+export type CreateArticleMutationFn = Apollo.MutationFunction<CreateArticleMutation, CreateArticleMutationVariables>;
 
 /**
- * __useCreateIssueMutation__
+ * __useCreateArticleMutation__
  *
- * To run a mutation, you first call `useCreateIssueMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateIssueMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateArticleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateArticleMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createIssueMutation, { data, loading, error }] = useCreateIssueMutation({
+ * const [createArticleMutation, { data, loading, error }] = useCreateArticleMutation({
  *   variables: {
  *      inputs: // value for 'inputs'
- *      journalId: // value for 'journalId'
+ *      issueId: // value for 'issueId'
  *   },
  * });
  */
-export function useCreateIssueMutation(baseOptions?: Apollo.MutationHookOptions<CreateIssueMutation, CreateIssueMutationVariables>) {
-        return Apollo.useMutation<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, baseOptions);
+export function useCreateArticleMutation(baseOptions?: Apollo.MutationHookOptions<CreateArticleMutation, CreateArticleMutationVariables>) {
+        return Apollo.useMutation<CreateArticleMutation, CreateArticleMutationVariables>(CreateArticleDocument, baseOptions);
       }
-export type CreateIssueMutationHookResult = ReturnType<typeof useCreateIssueMutation>;
-export type CreateIssueMutationResult = Apollo.MutationResult<CreateIssueMutation>;
-export type CreateIssueMutationOptions = Apollo.BaseMutationOptions<CreateIssueMutation, CreateIssueMutationVariables>;
-export const CreateJournalDocument = gql`
-    mutation CreateJournal($title: String!, $issn: String!, $period: String!, $cn: String, $yfdh: String, $organizer: String, $pub_place: String) {
-  createJournal(
-    inputs: {title: $title, issn: $issn, period: $period, cn: $cn, yfdh: $yfdh, organizer: $organizer, pub_place: $pub_place}
-  ) {
-    journal {
-      ...JournalFragment
+export type CreateArticleMutationHookResult = ReturnType<typeof useCreateArticleMutation>;
+export type CreateArticleMutationResult = Apollo.MutationResult<CreateArticleMutation>;
+export type CreateArticleMutationOptions = Apollo.BaseMutationOptions<CreateArticleMutation, CreateArticleMutationVariables>;
+export const DeleteArticleDocument = gql`
+    mutation DeleteArticle($id: Int!) {
+  deleteArticle(id: $id)
+}
+    `;
+export type DeleteArticleMutationFn = Apollo.MutationFunction<DeleteArticleMutation, DeleteArticleMutationVariables>;
+
+/**
+ * __useDeleteArticleMutation__
+ *
+ * To run a mutation, you first call `useDeleteArticleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteArticleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteArticleMutation, { data, loading, error }] = useDeleteArticleMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteArticleMutation(baseOptions?: Apollo.MutationHookOptions<DeleteArticleMutation, DeleteArticleMutationVariables>) {
+        return Apollo.useMutation<DeleteArticleMutation, DeleteArticleMutationVariables>(DeleteArticleDocument, baseOptions);
+      }
+export type DeleteArticleMutationHookResult = ReturnType<typeof useDeleteArticleMutation>;
+export type DeleteArticleMutationResult = Apollo.MutationResult<DeleteArticleMutation>;
+export type DeleteArticleMutationOptions = Apollo.BaseMutationOptions<DeleteArticleMutation, DeleteArticleMutationVariables>;
+export const UpdateArticleDocument = gql`
+    mutation UpdateArticle($inputs: ArticleInputs!, $id: Int!) {
+  updateArticle(inputs: $inputs, id: $id) {
+    article {
+      ...ArticleFragment
     }
     errors {
-      field
-      message
+      ...RegularFieldErrors
     }
   }
 }
-    ${JournalFragmentFragmentDoc}`;
-export type CreateJournalMutationFn = Apollo.MutationFunction<CreateJournalMutation, CreateJournalMutationVariables>;
+    ${ArticleFragmentFragmentDoc}
+${RegularFieldErrorsFragmentDoc}`;
+export type UpdateArticleMutationFn = Apollo.MutationFunction<UpdateArticleMutation, UpdateArticleMutationVariables>;
 
 /**
- * __useCreateJournalMutation__
+ * __useUpdateArticleMutation__
  *
- * To run a mutation, you first call `useCreateJournalMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateJournalMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpdateArticleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateArticleMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createJournalMutation, { data, loading, error }] = useCreateJournalMutation({
+ * const [updateArticleMutation, { data, loading, error }] = useUpdateArticleMutation({
  *   variables: {
- *      title: // value for 'title'
- *      issn: // value for 'issn'
- *      period: // value for 'period'
- *      cn: // value for 'cn'
- *      yfdh: // value for 'yfdh'
- *      organizer: // value for 'organizer'
- *      pub_place: // value for 'pub_place'
- *   },
- * });
- */
-export function useCreateJournalMutation(baseOptions?: Apollo.MutationHookOptions<CreateJournalMutation, CreateJournalMutationVariables>) {
-        return Apollo.useMutation<CreateJournalMutation, CreateJournalMutationVariables>(CreateJournalDocument, baseOptions);
-      }
-export type CreateJournalMutationHookResult = ReturnType<typeof useCreateJournalMutation>;
-export type CreateJournalMutationResult = Apollo.MutationResult<CreateJournalMutation>;
-export type CreateJournalMutationOptions = Apollo.BaseMutationOptions<CreateJournalMutation, CreateJournalMutationVariables>;
-export const DeleteIssueDocument = gql`
-    mutation DeleteIssue($id: Int!) {
-  deleteIssue(id: $id)
-}
-    `;
-export type DeleteIssueMutationFn = Apollo.MutationFunction<DeleteIssueMutation, DeleteIssueMutationVariables>;
-
-/**
- * __useDeleteIssueMutation__
- *
- * To run a mutation, you first call `useDeleteIssueMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteIssueMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteIssueMutation, { data, loading, error }] = useDeleteIssueMutation({
- *   variables: {
+ *      inputs: // value for 'inputs'
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useDeleteIssueMutation(baseOptions?: Apollo.MutationHookOptions<DeleteIssueMutation, DeleteIssueMutationVariables>) {
-        return Apollo.useMutation<DeleteIssueMutation, DeleteIssueMutationVariables>(DeleteIssueDocument, baseOptions);
+export function useUpdateArticleMutation(baseOptions?: Apollo.MutationHookOptions<UpdateArticleMutation, UpdateArticleMutationVariables>) {
+        return Apollo.useMutation<UpdateArticleMutation, UpdateArticleMutationVariables>(UpdateArticleDocument, baseOptions);
       }
-export type DeleteIssueMutationHookResult = ReturnType<typeof useDeleteIssueMutation>;
-export type DeleteIssueMutationResult = Apollo.MutationResult<DeleteIssueMutation>;
-export type DeleteIssueMutationOptions = Apollo.BaseMutationOptions<DeleteIssueMutation, DeleteIssueMutationVariables>;
-export const DeleteJournalDocument = gql`
-    mutation DeleteJournal($id: Int!) {
-  deleteJournal(id: $id)
-}
-    `;
-export type DeleteJournalMutationFn = Apollo.MutationFunction<DeleteJournalMutation, DeleteJournalMutationVariables>;
-
-/**
- * __useDeleteJournalMutation__
- *
- * To run a mutation, you first call `useDeleteJournalMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteJournalMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteJournalMutation, { data, loading, error }] = useDeleteJournalMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeleteJournalMutation(baseOptions?: Apollo.MutationHookOptions<DeleteJournalMutation, DeleteJournalMutationVariables>) {
-        return Apollo.useMutation<DeleteJournalMutation, DeleteJournalMutationVariables>(DeleteJournalDocument, baseOptions);
-      }
-export type DeleteJournalMutationHookResult = ReturnType<typeof useDeleteJournalMutation>;
-export type DeleteJournalMutationResult = Apollo.MutationResult<DeleteJournalMutation>;
-export type DeleteJournalMutationOptions = Apollo.BaseMutationOptions<DeleteJournalMutation, DeleteJournalMutationVariables>;
+export type UpdateArticleMutationHookResult = ReturnType<typeof useUpdateArticleMutation>;
+export type UpdateArticleMutationResult = Apollo.MutationResult<UpdateArticleMutation>;
+export type UpdateArticleMutationOptions = Apollo.BaseMutationOptions<UpdateArticleMutation, UpdateArticleMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -795,9 +1106,139 @@ export function useResetPasswordMutation(baseOptions?: Apollo.MutationHookOption
 export type ResetPasswordMutationHookResult = ReturnType<typeof useResetPasswordMutation>;
 export type ResetPasswordMutationResult = Apollo.MutationResult<ResetPasswordMutation>;
 export type ResetPasswordMutationOptions = Apollo.BaseMutationOptions<ResetPasswordMutation, ResetPasswordMutationVariables>;
-export const UpdateIssueDocument = gql`
-    mutation UpdateIssue($inputs: IssueInputs!, $id: Int!) {
-  updateIssue(inputs: $inputs, id: $id) {
+export const AcceptDocument = gql`
+    mutation Accept($id: Int!) {
+  accept(id: $id) {
+    id
+    state
+  }
+}
+    `;
+export type AcceptMutationFn = Apollo.MutationFunction<AcceptMutation, AcceptMutationVariables>;
+
+/**
+ * __useAcceptMutation__
+ *
+ * To run a mutation, you first call `useAcceptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAcceptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [acceptMutation, { data, loading, error }] = useAcceptMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAcceptMutation(baseOptions?: Apollo.MutationHookOptions<AcceptMutation, AcceptMutationVariables>) {
+        return Apollo.useMutation<AcceptMutation, AcceptMutationVariables>(AcceptDocument, baseOptions);
+      }
+export type AcceptMutationHookResult = ReturnType<typeof useAcceptMutation>;
+export type AcceptMutationResult = Apollo.MutationResult<AcceptMutation>;
+export type AcceptMutationOptions = Apollo.BaseMutationOptions<AcceptMutation, AcceptMutationVariables>;
+export const BorrowDocument = gql`
+    mutation Borrow($id: Int!) {
+  borrow(id: $id) {
+    id
+  }
+}
+    `;
+export type BorrowMutationFn = Apollo.MutationFunction<BorrowMutation, BorrowMutationVariables>;
+
+/**
+ * __useBorrowMutation__
+ *
+ * To run a mutation, you first call `useBorrowMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useBorrowMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [borrowMutation, { data, loading, error }] = useBorrowMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useBorrowMutation(baseOptions?: Apollo.MutationHookOptions<BorrowMutation, BorrowMutationVariables>) {
+        return Apollo.useMutation<BorrowMutation, BorrowMutationVariables>(BorrowDocument, baseOptions);
+      }
+export type BorrowMutationHookResult = ReturnType<typeof useBorrowMutation>;
+export type BorrowMutationResult = Apollo.MutationResult<BorrowMutation>;
+export type BorrowMutationOptions = Apollo.BaseMutationOptions<BorrowMutation, BorrowMutationVariables>;
+export const RejectDocument = gql`
+    mutation Reject($id: Int!) {
+  reject(id: $id) {
+    state
+  }
+}
+    `;
+export type RejectMutationFn = Apollo.MutationFunction<RejectMutation, RejectMutationVariables>;
+
+/**
+ * __useRejectMutation__
+ *
+ * To run a mutation, you first call `useRejectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRejectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rejectMutation, { data, loading, error }] = useRejectMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRejectMutation(baseOptions?: Apollo.MutationHookOptions<RejectMutation, RejectMutationVariables>) {
+        return Apollo.useMutation<RejectMutation, RejectMutationVariables>(RejectDocument, baseOptions);
+      }
+export type RejectMutationHookResult = ReturnType<typeof useRejectMutation>;
+export type RejectMutationResult = Apollo.MutationResult<RejectMutation>;
+export type RejectMutationOptions = Apollo.BaseMutationOptions<RejectMutation, RejectMutationVariables>;
+export const ReturnDocument = gql`
+    mutation Return($id: Int!) {
+  return(id: $id) {
+    id
+    state
+  }
+}
+    `;
+export type ReturnMutationFn = Apollo.MutationFunction<ReturnMutation, ReturnMutationVariables>;
+
+/**
+ * __useReturnMutation__
+ *
+ * To run a mutation, you first call `useReturnMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReturnMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [returnMutation, { data, loading, error }] = useReturnMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useReturnMutation(baseOptions?: Apollo.MutationHookOptions<ReturnMutation, ReturnMutationVariables>) {
+        return Apollo.useMutation<ReturnMutation, ReturnMutationVariables>(ReturnDocument, baseOptions);
+      }
+export type ReturnMutationHookResult = ReturnType<typeof useReturnMutation>;
+export type ReturnMutationResult = Apollo.MutationResult<ReturnMutation>;
+export type ReturnMutationOptions = Apollo.BaseMutationOptions<ReturnMutation, ReturnMutationVariables>;
+export const CreateIssueDocument = gql`
+    mutation CreateIssue($inputs: IssueInputs!, $journalId: Int!) {
+  createIssue(inputs: $inputs, journalId: $journalId) {
     issue {
       ...IssueFragment
     }
@@ -808,6 +1249,75 @@ export const UpdateIssueDocument = gql`
   }
 }
     ${IssueFragmentFragmentDoc}`;
+export type CreateIssueMutationFn = Apollo.MutationFunction<CreateIssueMutation, CreateIssueMutationVariables>;
+
+/**
+ * __useCreateIssueMutation__
+ *
+ * To run a mutation, you first call `useCreateIssueMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateIssueMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createIssueMutation, { data, loading, error }] = useCreateIssueMutation({
+ *   variables: {
+ *      inputs: // value for 'inputs'
+ *      journalId: // value for 'journalId'
+ *   },
+ * });
+ */
+export function useCreateIssueMutation(baseOptions?: Apollo.MutationHookOptions<CreateIssueMutation, CreateIssueMutationVariables>) {
+        return Apollo.useMutation<CreateIssueMutation, CreateIssueMutationVariables>(CreateIssueDocument, baseOptions);
+      }
+export type CreateIssueMutationHookResult = ReturnType<typeof useCreateIssueMutation>;
+export type CreateIssueMutationResult = Apollo.MutationResult<CreateIssueMutation>;
+export type CreateIssueMutationOptions = Apollo.BaseMutationOptions<CreateIssueMutation, CreateIssueMutationVariables>;
+export const DeleteIssueDocument = gql`
+    mutation DeleteIssue($id: Int!) {
+  deleteIssue(id: $id)
+}
+    `;
+export type DeleteIssueMutationFn = Apollo.MutationFunction<DeleteIssueMutation, DeleteIssueMutationVariables>;
+
+/**
+ * __useDeleteIssueMutation__
+ *
+ * To run a mutation, you first call `useDeleteIssueMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteIssueMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteIssueMutation, { data, loading, error }] = useDeleteIssueMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteIssueMutation(baseOptions?: Apollo.MutationHookOptions<DeleteIssueMutation, DeleteIssueMutationVariables>) {
+        return Apollo.useMutation<DeleteIssueMutation, DeleteIssueMutationVariables>(DeleteIssueDocument, baseOptions);
+      }
+export type DeleteIssueMutationHookResult = ReturnType<typeof useDeleteIssueMutation>;
+export type DeleteIssueMutationResult = Apollo.MutationResult<DeleteIssueMutation>;
+export type DeleteIssueMutationOptions = Apollo.BaseMutationOptions<DeleteIssueMutation, DeleteIssueMutationVariables>;
+export const UpdateIssueDocument = gql`
+    mutation UpdateIssue($inputs: IssueInputs!, $id: Int!) {
+  updateIssue(inputs: $inputs, id: $id) {
+    issue {
+      ...IssueFragment
+    }
+    errors {
+      ...RegularFieldErrors
+    }
+  }
+}
+    ${IssueFragmentFragmentDoc}
+${RegularFieldErrorsFragmentDoc}`;
 export type UpdateIssueMutationFn = Apollo.MutationFunction<UpdateIssueMutation, UpdateIssueMutationVariables>;
 
 /**
@@ -834,6 +1344,82 @@ export function useUpdateIssueMutation(baseOptions?: Apollo.MutationHookOptions<
 export type UpdateIssueMutationHookResult = ReturnType<typeof useUpdateIssueMutation>;
 export type UpdateIssueMutationResult = Apollo.MutationResult<UpdateIssueMutation>;
 export type UpdateIssueMutationOptions = Apollo.BaseMutationOptions<UpdateIssueMutation, UpdateIssueMutationVariables>;
+export const CreateJournalDocument = gql`
+    mutation CreateJournal($title: String!, $issn: String!, $period: String!, $cn: String, $yfdh: String, $organizer: String, $pub_place: String) {
+  createJournal(
+    inputs: {title: $title, issn: $issn, period: $period, cn: $cn, yfdh: $yfdh, organizer: $organizer, pub_place: $pub_place}
+  ) {
+    journal {
+      ...JournalFragment
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+    ${JournalFragmentFragmentDoc}`;
+export type CreateJournalMutationFn = Apollo.MutationFunction<CreateJournalMutation, CreateJournalMutationVariables>;
+
+/**
+ * __useCreateJournalMutation__
+ *
+ * To run a mutation, you first call `useCreateJournalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateJournalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createJournalMutation, { data, loading, error }] = useCreateJournalMutation({
+ *   variables: {
+ *      title: // value for 'title'
+ *      issn: // value for 'issn'
+ *      period: // value for 'period'
+ *      cn: // value for 'cn'
+ *      yfdh: // value for 'yfdh'
+ *      organizer: // value for 'organizer'
+ *      pub_place: // value for 'pub_place'
+ *   },
+ * });
+ */
+export function useCreateJournalMutation(baseOptions?: Apollo.MutationHookOptions<CreateJournalMutation, CreateJournalMutationVariables>) {
+        return Apollo.useMutation<CreateJournalMutation, CreateJournalMutationVariables>(CreateJournalDocument, baseOptions);
+      }
+export type CreateJournalMutationHookResult = ReturnType<typeof useCreateJournalMutation>;
+export type CreateJournalMutationResult = Apollo.MutationResult<CreateJournalMutation>;
+export type CreateJournalMutationOptions = Apollo.BaseMutationOptions<CreateJournalMutation, CreateJournalMutationVariables>;
+export const DeleteJournalDocument = gql`
+    mutation DeleteJournal($id: Int!) {
+  deleteJournal(id: $id)
+}
+    `;
+export type DeleteJournalMutationFn = Apollo.MutationFunction<DeleteJournalMutation, DeleteJournalMutationVariables>;
+
+/**
+ * __useDeleteJournalMutation__
+ *
+ * To run a mutation, you first call `useDeleteJournalMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteJournalMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteJournalMutation, { data, loading, error }] = useDeleteJournalMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteJournalMutation(baseOptions?: Apollo.MutationHookOptions<DeleteJournalMutation, DeleteJournalMutationVariables>) {
+        return Apollo.useMutation<DeleteJournalMutation, DeleteJournalMutationVariables>(DeleteJournalDocument, baseOptions);
+      }
+export type DeleteJournalMutationHookResult = ReturnType<typeof useDeleteJournalMutation>;
+export type DeleteJournalMutationResult = Apollo.MutationResult<DeleteJournalMutation>;
+export type DeleteJournalMutationOptions = Apollo.BaseMutationOptions<DeleteJournalMutation, DeleteJournalMutationVariables>;
 export const UpdateJournalDocument = gql`
     mutation UpdateJournal($id: Int!, $inputs: JournalInputs!) {
   updateJournal(id: $id, inputs: $inputs) {
@@ -874,8 +1460,8 @@ export type UpdateJournalMutationHookResult = ReturnType<typeof useUpdateJournal
 export type UpdateJournalMutationResult = Apollo.MutationResult<UpdateJournalMutation>;
 export type UpdateJournalMutationOptions = Apollo.BaseMutationOptions<UpdateJournalMutation, UpdateJournalMutationVariables>;
 export const CatalogsDocument = gql`
-    query Catalogs {
-  catalogs {
+    query Catalogs($cursor: Int! = 0, $limit: Int! = 20) {
+  catalogs(cursor: $cursor, limit: $limit) {
     id
     title
     issn
@@ -899,6 +1485,8 @@ export const CatalogsDocument = gql`
  * @example
  * const { data, loading, error } = useCatalogsQuery({
  *   variables: {
+ *      cursor: // value for 'cursor'
+ *      limit: // value for 'limit'
  *   },
  * });
  */
@@ -911,6 +1499,145 @@ export function useCatalogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<C
 export type CatalogsQueryHookResult = ReturnType<typeof useCatalogsQuery>;
 export type CatalogsLazyQueryHookResult = ReturnType<typeof useCatalogsLazyQuery>;
 export type CatalogsQueryResult = Apollo.QueryResult<CatalogsQuery, CatalogsQueryVariables>;
+export const GetBorrowsDocument = gql`
+    query GetBorrows($isReturned: Boolean!, $cursor: Int = 0, $limit: Int = 10) {
+  getBorrows(isReturned: $isReturned, cursor: $cursor, limit: $limit) {
+    user {
+      id
+      username
+    }
+    issue {
+      id
+      no
+      journal {
+        title
+      }
+    }
+    expireAt
+    borrowAt
+    returnAt
+    state
+    id
+  }
+}
+    `;
+
+/**
+ * __useGetBorrowsQuery__
+ *
+ * To run a query within a React component, call `useGetBorrowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBorrowsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBorrowsQuery({
+ *   variables: {
+ *      isReturned: // value for 'isReturned'
+ *      cursor: // value for 'cursor'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGetBorrowsQuery(baseOptions: Apollo.QueryHookOptions<GetBorrowsQuery, GetBorrowsQueryVariables>) {
+        return Apollo.useQuery<GetBorrowsQuery, GetBorrowsQueryVariables>(GetBorrowsDocument, baseOptions);
+      }
+export function useGetBorrowsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBorrowsQuery, GetBorrowsQueryVariables>) {
+          return Apollo.useLazyQuery<GetBorrowsQuery, GetBorrowsQueryVariables>(GetBorrowsDocument, baseOptions);
+        }
+export type GetBorrowsQueryHookResult = ReturnType<typeof useGetBorrowsQuery>;
+export type GetBorrowsLazyQueryHookResult = ReturnType<typeof useGetBorrowsLazyQuery>;
+export type GetBorrowsQueryResult = Apollo.QueryResult<GetBorrowsQuery, GetBorrowsQueryVariables>;
+export const GetPendingsDocument = gql`
+    query GetPendings {
+  getPendings {
+    id
+    state
+    borrowAt
+    expireAt
+    user {
+      id
+      username
+    }
+    issue {
+      id
+      no
+      journal {
+        id
+        title
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPendingsQuery__
+ *
+ * To run a query within a React component, call `useGetPendingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPendingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPendingsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetPendingsQuery(baseOptions?: Apollo.QueryHookOptions<GetPendingsQuery, GetPendingsQueryVariables>) {
+        return Apollo.useQuery<GetPendingsQuery, GetPendingsQueryVariables>(GetPendingsDocument, baseOptions);
+      }
+export function useGetPendingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPendingsQuery, GetPendingsQueryVariables>) {
+          return Apollo.useLazyQuery<GetPendingsQuery, GetPendingsQueryVariables>(GetPendingsDocument, baseOptions);
+        }
+export type GetPendingsQueryHookResult = ReturnType<typeof useGetPendingsQuery>;
+export type GetPendingsLazyQueryHookResult = ReturnType<typeof useGetPendingsLazyQuery>;
+export type GetPendingsQueryResult = Apollo.QueryResult<GetPendingsQuery, GetPendingsQueryVariables>;
+export const IssueDetailDocument = gql`
+    query IssueDetail($id: Int!) {
+  issue(id: $id, detail: true) {
+    id
+    year
+    vol
+    no
+    total
+    rem
+    journalId
+    articles {
+      ...ArticleFragment
+    }
+  }
+}
+    ${ArticleFragmentFragmentDoc}`;
+
+/**
+ * __useIssueDetailQuery__
+ *
+ * To run a query within a React component, call `useIssueDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIssueDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIssueDetailQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIssueDetailQuery(baseOptions: Apollo.QueryHookOptions<IssueDetailQuery, IssueDetailQueryVariables>) {
+        return Apollo.useQuery<IssueDetailQuery, IssueDetailQueryVariables>(IssueDetailDocument, baseOptions);
+      }
+export function useIssueDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IssueDetailQuery, IssueDetailQueryVariables>) {
+          return Apollo.useLazyQuery<IssueDetailQuery, IssueDetailQueryVariables>(IssueDetailDocument, baseOptions);
+        }
+export type IssueDetailQueryHookResult = ReturnType<typeof useIssueDetailQuery>;
+export type IssueDetailLazyQueryHookResult = ReturnType<typeof useIssueDetailLazyQuery>;
+export type IssueDetailQueryResult = Apollo.QueryResult<IssueDetailQuery, IssueDetailQueryVariables>;
 export const JournalDetailDocument = gql`
     query JournalDetail($id: Int!) {
   journal(id: $id, detail: true) {
@@ -988,3 +1715,79 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const SearchArticleDocument = gql`
+    query SearchArticle($searchText: String!, $type: String!, $cursor: Int! = 0, $limit: Int! = 10) {
+  searchArticle(
+    searchText: $searchText
+    type: $type
+    cursor: $cursor
+    limit: $limit
+  ) {
+    ...ArticleFragment
+  }
+}
+    ${ArticleFragmentFragmentDoc}`;
+
+/**
+ * __useSearchArticleQuery__
+ *
+ * To run a query within a React component, call `useSearchArticleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchArticleQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchArticleQuery({
+ *   variables: {
+ *      searchText: // value for 'searchText'
+ *      type: // value for 'type'
+ *      cursor: // value for 'cursor'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useSearchArticleQuery(baseOptions: Apollo.QueryHookOptions<SearchArticleQuery, SearchArticleQueryVariables>) {
+        return Apollo.useQuery<SearchArticleQuery, SearchArticleQueryVariables>(SearchArticleDocument, baseOptions);
+      }
+export function useSearchArticleLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchArticleQuery, SearchArticleQueryVariables>) {
+          return Apollo.useLazyQuery<SearchArticleQuery, SearchArticleQueryVariables>(SearchArticleDocument, baseOptions);
+        }
+export type SearchArticleQueryHookResult = ReturnType<typeof useSearchArticleQuery>;
+export type SearchArticleLazyQueryHookResult = ReturnType<typeof useSearchArticleLazyQuery>;
+export type SearchArticleQueryResult = Apollo.QueryResult<SearchArticleQuery, SearchArticleQueryVariables>;
+export const SearchJournalDocument = gql`
+    query SearchJournal($searchText: String!, $cursor: Int = 0, $limit: Int = 10) {
+  searchJournal(searchText: $searchText, cursor: $cursor, limit: $limit) {
+    ...JournalFragment
+  }
+}
+    ${JournalFragmentFragmentDoc}`;
+
+/**
+ * __useSearchJournalQuery__
+ *
+ * To run a query within a React component, call `useSearchJournalQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchJournalQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchJournalQuery({
+ *   variables: {
+ *      searchText: // value for 'searchText'
+ *      cursor: // value for 'cursor'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useSearchJournalQuery(baseOptions: Apollo.QueryHookOptions<SearchJournalQuery, SearchJournalQueryVariables>) {
+        return Apollo.useQuery<SearchJournalQuery, SearchJournalQueryVariables>(SearchJournalDocument, baseOptions);
+      }
+export function useSearchJournalLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchJournalQuery, SearchJournalQueryVariables>) {
+          return Apollo.useLazyQuery<SearchJournalQuery, SearchJournalQueryVariables>(SearchJournalDocument, baseOptions);
+        }
+export type SearchJournalQueryHookResult = ReturnType<typeof useSearchJournalQuery>;
+export type SearchJournalLazyQueryHookResult = ReturnType<typeof useSearchJournalLazyQuery>;
+export type SearchJournalQueryResult = Apollo.QueryResult<SearchJournalQuery, SearchJournalQueryVariables>;

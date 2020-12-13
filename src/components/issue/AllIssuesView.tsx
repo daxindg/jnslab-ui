@@ -5,12 +5,9 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
-  Divider,
   Flex,
   Heading,
-  Text
 } from "@chakra-ui/react";
-import { Head } from "next/document";
 import React from "react";
 import { Issue, useMeQuery } from "../../generated/graphql";
 import { testEdit } from "../../utils/permissions";
@@ -48,7 +45,10 @@ const IssuesInAge: React.FC<{
   );
 };
 
-export const AllIssuesView: React.FC<AllIssuesViewProps> = ({ issues, journalId }) => {
+export const AllIssuesView: React.FC<AllIssuesViewProps> = ({
+  issues,
+  journalId,
+}) => {
   const res: Record<string, Record<string, Issue[]>> = {};
   issues.forEach((it) => {
     const age = `${(it.year / 10) | 0}0`;
@@ -57,7 +57,7 @@ export const AllIssuesView: React.FC<AllIssuesViewProps> = ({ issues, journalId 
     if (!res[age][year]) res[age][year] = [];
     res[age][year].push(it);
   });
-  const {data}= useMeQuery();
+  const { data } = useMeQuery();
   const content = [];
 
   for (let age in res) {
@@ -67,10 +67,14 @@ export const AllIssuesView: React.FC<AllIssuesViewProps> = ({ issues, journalId 
   return (
     <Box mt={8}>
       <Flex>
-        <Heading ml={4} size="lg">期刊目录</Heading>
-        {!testEdit(data?.me?.permission) ? null : <NewIssuePopover journalId={journalId}/>}
+        <Heading ml={4} size="lg">
+          期刊目录
+        </Heading>
+        {!testEdit(data?.me?.permission) ? null : (
+          <NewIssuePopover journalId={journalId} />
+        )}
       </Flex>
-      
+
       <Accordion defaultIndex={[0]} allowMultiple>
         {content.sort(
           (a, b) => parseInt(b.key as string) - parseInt(a.key as string)

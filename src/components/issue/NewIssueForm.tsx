@@ -1,13 +1,11 @@
-import { AddIcon, EditIcon } from "@chakra-ui/icons"
-import { Button, ButtonGroup, Flex, FormControl, FormErrorMessage, FormLabel, IconButton, Input, Popover, PopoverArrow, PopoverCloseButton, PopoverContent, PopoverTrigger, Stack, useToast } from "@chakra-ui/react"
-import { Field, Form, Formik, useField } from "formik"
-import React, { useState } from "react"
-import { Issue, useCreateIssueMutation, useUpdateIssueMutation } from "../../generated/graphql"
-import { InputField } from "../InputField"
-import { EditIssueForm } from "./EditIssueForm"
-import FocusLock from "react-focus-lock";
-import { toErrorMap } from "../../utils/toErrorMap"
 import { useApolloClient } from "@apollo/client"
+import { AddIcon } from "@chakra-ui/icons"
+import { Button, ButtonGroup, FormControl, FormErrorMessage, FormLabel, IconButton, Input, Popover, PopoverArrow, PopoverCloseButton, PopoverContent, PopoverTrigger, Stack, useToast } from "@chakra-ui/react"
+import { Form, Formik, useField } from "formik"
+import React, { useState } from "react"
+import FocusLock from "react-focus-lock"
+import { useCreateIssueMutation } from "../../generated/graphql"
+import { toErrorMap } from "../../utils/toErrorMap"
 
 interface createIssueFormProps {
   onCancel:()=>void;

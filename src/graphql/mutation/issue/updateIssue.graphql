@@ -4,8 +4,7 @@ mutation UpdateIssue($inputs:IssueInputs!, $id:Int!) {
       ...IssueFragment
     }
     errors {
-      field
-      message
+      ...RegularFieldErrors
     }
   }
 }

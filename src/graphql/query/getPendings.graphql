@@ -1,0 +1,21 @@
+query GetPendings {
+  getPendings {
+    id
+    state
+    borrowAt
+    expireAt
+    user {
+      id
+      username
+    }
+    issue {
+      id
+      no
+      journal {
+        id
+        title
+      }
+      
+    }
+  }
+}

@@ -1,0 +1,20 @@
+query GetBorrows($isReturned: Boolean!, $cursor:Int = 0, $limit:Int = 10){
+  getBorrows(isReturned: $isReturned, cursor:$cursor, limit:$limit) {
+    user {
+      id
+      username
+    }
+    issue {
+      id
+      no
+      journal {
+        title
+      }
+    }
+    expireAt
+    borrowAt
+    returnAt
+    state
+    id
+  }
+}

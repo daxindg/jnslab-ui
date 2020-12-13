@@ -1,0 +1,10 @@
+mutation UpdateArticle($inputs: ArticleInputs!, $id: Int!) {
+  updateArticle(inputs: $inputs, id:$id) {
+    article {
+      ...ArticleFragment 
+    }
+    errors {
+      ...RegularFieldErrors
+    }
+  }
+}

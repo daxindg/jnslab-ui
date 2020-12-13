@@ -1,0 +1,14 @@
+query IssueDetail($id: Int!) { 
+	issue(id: $id, detail: true) {
+    id
+    year
+    vol
+    no
+    total
+    rem
+    journalId
+  	articles {
+      ...ArticleFragment
+    }
+  }
+}
