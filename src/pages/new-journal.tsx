@@ -1,20 +1,17 @@
 import {
   Alert,
   AlertIcon,
-  AlertTitle,
   Box,
   Button,
   FormControl,
   FormLabel,
   Radio,
   RadioGroup,
-  Stack,
-  AlertDescription,
   Spinner,
-  Link,
+  Stack,
   useToast,
 } from "@chakra-ui/react";
-import { Formik, Form } from "formik";
+import { Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { InputField } from "../components/InputField";
@@ -23,9 +20,6 @@ import { Wrapper } from "../components/Wrapper";
 import { useCreateJournalMutation, useMeQuery } from "../generated/graphql";
 import { testEdit } from "../utils/permissions";
 import { toErrorMap } from "../utils/toErrorMap";
-import NextLink from "next/link";
-import { clearAndSetTimeout } from "../utils/setTimeout";
-import { isServer } from "../utils/isServer";
 
 const NewJournal: React.FC<{}> = ({}) => {
   const { data: meData, loading } = useMeQuery();
@@ -56,6 +50,7 @@ const NewJournal: React.FC<{}> = ({}) => {
           cn: "",
           yfdh: "",
           organizer: "",
+          pub_place: "",
         }}
         onSubmit={async (value, { setErrors }) => {
           const res = await createJournal({ variables: { period, ...value } });
@@ -136,6 +131,14 @@ const NewJournal: React.FC<{}> = ({}) => {
               />
             </Box>
 
+            <Box mt={4}>
+              <InputField
+                name="pub_place"
+                placeholder="出版地"
+                label="出版地"
+                autoComplete="off"
+              />
+            </Box>
 
             {error ? (
               <Box mt={4}>
@@ -167,7 +170,7 @@ const NewJournal: React.FC<{}> = ({}) => {
       isClosable: true,
       status: "error",
     });
-    router.push('/');
+    router.push("/");
   }
 
   return (

@@ -1,14 +1,11 @@
 import {
   Alert,
-  AlertDescription,
   AlertIcon,
-  AlertTitle,
   Box,
   Button,
   Flex,
   FormControl,
   FormLabel,
-  Link,
   Radio,
   RadioGroup,
   Spinner,
@@ -17,40 +14,35 @@ import {
 } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { InputField } from "../../../components/InputField";
 import { NavBar } from "../../../components/NavBar";
 import { Wrapper } from "../../../components/Wrapper";
 import {
-  useCreateJournalMutation,
   useJournalDetailQuery,
   useMeQuery,
   useUpdateJournalMutation,
 } from "../../../generated/graphql";
 import { isServer } from "../../../utils/isServer";
 import { testEdit } from "../../../utils/permissions";
-import { clearAndSetTimeout } from "../../../utils/setTimeout";
 import { toErrorMap } from "../../../utils/toErrorMap";
 
-const EditJournal: NextPage<{id:string}> = ({id}) => {
+const EditJournal: NextPage<{ id: string }> = ({ id }) => {
   const toast = useToast();
   const { data: meData, loading: loadingUser } = useMeQuery();
-  const {data, loading:loadingJournalDetail} = useJournalDetailQuery(
-    {
-      variables: {
-        id: parseInt(id)
-      }
-    }
-  );
+  const { data, loading: loadingJournalDetail } = useJournalDetailQuery({
+    variables: {
+      id: parseInt(id),
+    },
+  });
   const [period, setPeriod] = useState<string>(data?.journal?.period || "");
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
-  const [updateJournal, {data: updatedData}] = useUpdateJournalMutation();
+  const [updateJournal, { data: updatedData }] = useUpdateJournalMutation();
   const router = useRouter();
   let body = null;
-  
+
   if (loadingUser || loadingJournalDetail) {
     body = (
       <Spinner
@@ -71,39 +63,38 @@ const EditJournal: NextPage<{id:string}> = ({id}) => {
           cn: data?.journal?.cn || "",
           yfdh: data?.journal?.yfdh || "",
           organizer: data?.journal?.organizer || "",
-          
+          pub_place: data?.journal?.pub_place || "",
           // ...(data?.journal)
         }}
         onSubmit={async (value, { setErrors }) => {
           // const res = await createJournal({ variables: {period, ...value } });
-          const res = await updateJournal({variables: {
-            id: parseInt(id),
-            inputs: {
-              period, 
-              ...value
-            }
-          }});
+          const res = await updateJournal({
+            variables: {
+              id: parseInt(id),
+              inputs: {
+                period,
+                ...value,
+              },
+            },
+          });
           if (res.data?.updateJournal.errors) {
             setErrors(toErrorMap(res.data.updateJournal.errors));
-          }
-          else if (res.data?.updateJournal.journal) {
+          } else if (res.data?.updateJournal.journal) {
             setSuccess(true);
             toast({
               title: "更新成功",
               duration: 3000,
               isClosable: true,
-              status: "success"
+              status: "success",
             });
-            if (!isServer())router.back();
-          }
-          else {
+            if (!isServer()) router.back();
+          } else {
             setError(true);
           }
 
           // if (res.data?.createJournal.errors) {
           //   setErrors(toErrorMap(res.data.createJournal.errors));
           // } else if (res.data?.createJournal.journal) {
-          //   // TODO redirect to detail page
           //   setSuccess(true);
           //   router.push(`/catalog-detail/${res.data.createJournal.journal.id}`);
           // } else {
@@ -177,6 +168,14 @@ const EditJournal: NextPage<{id:string}> = ({id}) => {
               />
             </Box>
 
+            <Box mt={4}>
+              <InputField
+                name="pub_place"
+                placeholder="出版地"
+                label="出版地"
+                autoComplete="off"
+              />
+            </Box>
             {error ? (
               <Box mt={4}>
                 <Alert status="error">
@@ -187,41 +186,32 @@ const EditJournal: NextPage<{id:string}> = ({id}) => {
             ) : null}
 
             <Flex mt={4} justifyContent="space-between" alignItems="center">
-            <Button
-              type="submit"
-              colorScheme="teal"
-              isLoading={isSubmitting}
-            >
-              确认
-            </Button>
-            
-            <Button
-              onClick={
-                () => {
+              <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
+                确认
+              </Button>
+
+              <Button
+                onClick={() => {
                   router.back();
-                }
-              }
-              colorScheme="teal"
-              isLoading={isSubmitting}
-            >
-              返回
-            </Button>
+                }}
+                colorScheme="teal"
+                isLoading={isSubmitting}
+              >
+                返回
+              </Button>
             </Flex>
           </Form>
         )}
       </Formik>
     );
   } else {
-    toast(
-      {
-        title: "权限不足",
-        status: "warning",
-        duration: 3000,
-        isClosable: true
-      }
-    );
-    if (!isServer())router.back();
-    
+    toast({
+      title: "权限不足",
+      status: "warning",
+      duration: 3000,
+      isClosable: true,
+    });
+    if (!isServer()) router.back();
   }
 
   return (
@@ -232,10 +222,10 @@ const EditJournal: NextPage<{id:string}> = ({id}) => {
   );
 };
 
-EditJournal.getInitialProps = ({query}) => {
+EditJournal.getInitialProps = ({ query }) => {
   return {
-    id: query.id as string
-  }
-}
+    id: query.id as string,
+  };
+};
 
 export default EditJournal;
