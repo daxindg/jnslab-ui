@@ -2,6 +2,8 @@ import { ApolloProvider } from "@apollo/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "../theme";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
+import React from "react";
+import Head from "next/head";
 
 const client = new ApolloClient({
   uri: process.env.NEXT_PUBLIC_API_URL,
@@ -47,11 +49,16 @@ const client = new ApolloClient({
 });
 function MyApp({ Component, pageProps }: any) {
   return (
-    <ApolloProvider client={client}>
-      <ChakraProvider resetCSS theme={theme}>
-        <Component {...pageProps} />
-      </ChakraProvider>
-    </ApolloProvider>
+    <>
+      <Head>
+        <title>期刊管理系统</title>
+      </Head>
+      <ApolloProvider client={client}>
+        <ChakraProvider resetCSS theme={theme}>
+          <Component {...pageProps} />
+        </ChakraProvider>
+      </ApolloProvider>
+    </>
   );
 }
 
