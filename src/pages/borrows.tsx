@@ -1,4 +1,4 @@
-import { useApolloClient } from "@apollo/client";
+import { NetworkStatus } from "@apollo/client";
 import {
   Badge,
   Button,
@@ -33,8 +33,9 @@ const Borrows: React.FC<borrowsProps> = ({}) => {
     data: retedBorrows,
     fetchMore: fetchMoreReted,
     loading: loadingRetedBorrows,
-    refetch: refetchReted,
+    networkStatus,
   } = useGetBorrowsQuery({
+    notifyOnNetworkStatusChange: true,
     variables: {
       isReturned: true,
     },
@@ -44,21 +45,21 @@ const Borrows: React.FC<borrowsProps> = ({}) => {
     fetchMore: fetchMoreUnReted,
     loading: loadingNotRetedBorrows,
     refetch: refetchUnReted,
-    error
+    error,
   } = useGetBorrowsQuery({
     fetchPolicy: "no-cache",
     variables: {
       isReturned: false,
     },
-    errorPolicy: "all"
+    errorPolicy: "all",
   });
   const [returnBook, { loading: loadingReturn }] = useReturnMutation();
   const [len, setLen] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const router = useRouter();
   const toast = useToast();
-  if ( error) {
-    router.push('/');
+  if (error) {
+    router.push("/");
     toast({
       title: "无权限",
       description: error?.message,
@@ -168,7 +169,10 @@ const Borrows: React.FC<borrowsProps> = ({}) => {
             <Flex mt={4}>
               <Button
                 mx="auto"
-                isLoading={loadingRetedBorrows}
+                isLoading={
+                  loadingRetedBorrows ||
+                  networkStatus === NetworkStatus.fetchMore
+                }
                 disabled={!hasMore}
                 onClick={async () => {
                   if (len === retedBorrows?.getBorrows.length) {

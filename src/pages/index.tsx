@@ -1,20 +1,18 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  SimpleGrid,
-  Spacer,
-  Spinner,
-  Text,
-} from "@chakra-ui/react";
-import React, { useState } from "react";
-import { useCatalogsQuery, useMeQuery } from "../generated/graphql";
+import { NetworkStatus } from "@apollo/client";
+import { Button, Flex, Heading, Spacer, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
+import React, { useState } from "react";
 import { Layout } from "../components/Layout";
 import { Loading } from "../components/Loading";
+import { useCatalogsQuery } from "../generated/graphql";
 const Index = () => {
-  const { data, loading: fetchingCatalogs, fetchMore } = useCatalogsQuery({
+  const {
+    data,
+    loading: fetchingCatalogs,
+    fetchMore,
+    networkStatus,
+  } = useCatalogsQuery({
+    notifyOnNetworkStatusChange: true,
     variables: {
       cursor: 0,
       limit: 20,
@@ -60,10 +58,11 @@ const Index = () => {
           </Flex>
           <Flex mb={8} justify="center">
             <Button
-              isLoading={fetchingCatalogs}
+              isLoading={
+                fetchingCatalogs || networkStatus === NetworkStatus.fetchMore
+              }
               disabled={!hasMore}
               onClick={async () => {
-                
                 if (len === data.catalogs.length) {
                   setHasMore(false);
                   return;
@@ -79,7 +78,7 @@ const Index = () => {
                 });
               }}
             >
-              {hasMore ? '加载更多' : '一滴都不剩啦'}
+              {hasMore ? "加载更多" : "一滴都不剩啦"}
             </Button>
           </Flex>
         </>

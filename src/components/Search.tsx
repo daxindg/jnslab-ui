@@ -1,3 +1,4 @@
+import { NetworkStatus } from "@apollo/client";
 import { SearchIcon } from "@chakra-ui/icons";
 import {
   Button,
@@ -60,12 +61,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
               type="submit"
               isLoading={isSubmitting}
               aria-label="search"
-              _hover={
-                {
-                  backgroundColor: "transparent",
-                  color: "blue.500"
-                }
-              }
+              _hover={{
+                backgroundColor: "transparent",
+                color: "blue.500",
+              }}
               icon={<SearchIcon />}
             />
           }
@@ -80,12 +79,22 @@ export const Search: React.FC<{}> = ({}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [
     searchArticle,
-    { loading: loadingArticles, fetchMore: fetchMoreArticle, data: articeRes },
-  ] = useSearchArticleLazyQuery();
+    {
+      loading: loadingArticles,
+      fetchMore: fetchMoreArticle,
+      data: articeRes,
+      networkStatus: artNetStatus,
+    },
+  ] = useSearchArticleLazyQuery({ notifyOnNetworkStatusChange: true });
   const [
     searchJournal,
-    { loading: loadingJournals, fetchMore: fetchMoreJournal, data: journalRes },
-  ] = useSearchJournalLazyQuery();
+    {
+      loading: loadingJournals,
+      fetchMore: fetchMoreJournal,
+      data: journalRes,
+      networkStatus: jouNetStatus,
+    },
+  ] = useSearchJournalLazyQuery({ notifyOnNetworkStatusChange: true });
   const [hasMoreArticle, setHasMoreArticle] = useState(true);
   const [hasMoreJournal, setHasMoreJournal] = useState(true);
   const [alen, setalen] = useState(0);
@@ -171,7 +180,10 @@ export const Search: React.FC<{}> = ({}) => {
                           </Table>
                           <Flex justify="center" mt={8}>
                             <Button
-                              isLoading={loadingJournals}
+                              isLoading={
+                                loadingJournals ||
+                                jouNetStatus === NetworkStatus.fetchMore
+                              }
                               disabled={!hasMoreJournal}
                               onClick={async () => {
                                 if (jlen === journalRes.searchJournal.length) {
@@ -263,7 +275,10 @@ export const Search: React.FC<{}> = ({}) => {
                           </Table>
                           <Flex justify="center" mt={8}>
                             <Button
-                              isLoading={loadingArticles}
+                              isLoading={
+                                loadingArticles ||
+                                artNetStatus === NetworkStatus.fetchMore
+                              }
                               disabled={!hasMoreArticle}
                               onClick={async () => {
                                 if (alen === articeRes.searchArticle.length) {
