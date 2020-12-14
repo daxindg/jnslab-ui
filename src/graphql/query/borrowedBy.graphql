@@ -1,0 +1,12 @@
+query BorrowedBy($id:Int!) {
+  borrowedBy(id:$id) {
+    id
+    userId
+    borrowAt
+    expireAt
+    state
+    user {
+      username
+    }
+  }
+}

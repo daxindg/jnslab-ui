@@ -14,6 +14,7 @@ import NextLink from "next/link";
 import React from "react";
 import { ArticleList } from "../../components/article/ArticleList";
 import { NewArticleForm } from "../../components/article/NewArticlePopoverForm";
+import { BorrowedByDrawer } from "../../components/issue/BorrowedByDrawer";
 import { Layout } from "../../components/Layout";
 import { Loading } from "../../components/Loading";
 import {
@@ -57,6 +58,7 @@ const IssueDetail: NextPage<issueDetailProps> = ({ id }) => {
             color="gray.400"
           >{`Vol.${issueData?.issue?.vol} No.${issueData?.issue?.no}`}</Text>
           <Badge mx={4}>剩余: {issueData?.issue?.rem}</Badge>
+          <BorrowedByDrawer issueId={id}/>
           <Button
             size="sm"
             disabled={!issueData?.issue?.rem}

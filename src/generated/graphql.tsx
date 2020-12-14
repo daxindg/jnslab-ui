@@ -23,6 +23,7 @@ export type Query = {
   me?: Maybe<User>;
   issueCatalog: Array<Issue>;
   issue?: Maybe<Issue>;
+  borrowedBy: Array<Borrow>;
   articleCatalog: Array<Article>;
   article?: Maybe<Article>;
   searchArticle: Array<Article>;
@@ -52,6 +53,11 @@ export type QuerySearchJournalArgs = {
 
 export type QueryIssueArgs = {
   detail?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
+};
+
+
+export type QueryBorrowedByArgs = {
   id: Scalars['Int'];
 };
 
@@ -517,7 +523,7 @@ export type RejectMutation = (
   { __typename?: 'Mutation' }
   & { reject?: Maybe<(
     { __typename?: 'Borrow' }
-    & Pick<Borrow, 'state'>
+    & Pick<Borrow, 'id' | 'state'>
   )> }
 );
 
@@ -637,6 +643,23 @@ export type UpdateJournalMutation = (
       & JournalFragmentFragment
     )> }
   ) }
+);
+
+export type BorrowedByQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type BorrowedByQuery = (
+  { __typename?: 'Query' }
+  & { borrowedBy: Array<(
+    { __typename?: 'Borrow' }
+    & Pick<Borrow, 'id' | 'userId' | 'borrowAt' | 'expireAt' | 'state'>
+    & { user: (
+      { __typename?: 'User' }
+      & Pick<User, 'username'>
+    ) }
+  )> }
 );
 
 export type CatalogsQueryVariables = Exact<{
@@ -1174,6 +1197,7 @@ export type BorrowMutationOptions = Apollo.BaseMutationOptions<BorrowMutation, B
 export const RejectDocument = gql`
     mutation Reject($id: Int!) {
   reject(id: $id) {
+    id
     state
   }
 }
@@ -1459,6 +1483,46 @@ export function useUpdateJournalMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateJournalMutationHookResult = ReturnType<typeof useUpdateJournalMutation>;
 export type UpdateJournalMutationResult = Apollo.MutationResult<UpdateJournalMutation>;
 export type UpdateJournalMutationOptions = Apollo.BaseMutationOptions<UpdateJournalMutation, UpdateJournalMutationVariables>;
+export const BorrowedByDocument = gql`
+    query BorrowedBy($id: Int!) {
+  borrowedBy(id: $id) {
+    id
+    userId
+    borrowAt
+    expireAt
+    state
+    user {
+      username
+    }
+  }
+}
+    `;
+
+/**
+ * __useBorrowedByQuery__
+ *
+ * To run a query within a React component, call `useBorrowedByQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBorrowedByQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBorrowedByQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useBorrowedByQuery(baseOptions: Apollo.QueryHookOptions<BorrowedByQuery, BorrowedByQueryVariables>) {
+        return Apollo.useQuery<BorrowedByQuery, BorrowedByQueryVariables>(BorrowedByDocument, baseOptions);
+      }
+export function useBorrowedByLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BorrowedByQuery, BorrowedByQueryVariables>) {
+          return Apollo.useLazyQuery<BorrowedByQuery, BorrowedByQueryVariables>(BorrowedByDocument, baseOptions);
+        }
+export type BorrowedByQueryHookResult = ReturnType<typeof useBorrowedByQuery>;
+export type BorrowedByLazyQueryHookResult = ReturnType<typeof useBorrowedByLazyQuery>;
+export type BorrowedByQueryResult = Apollo.QueryResult<BorrowedByQuery, BorrowedByQueryVariables>;
 export const CatalogsDocument = gql`
     query Catalogs($cursor: Int! = 0, $limit: Int! = 20) {
   catalogs(cursor: $cursor, limit: $limit) {
